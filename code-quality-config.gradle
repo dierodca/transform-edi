@@ -1,0 +1,97 @@
+/** ########### PMD CONFIGURATION  **/
+
+pmd {
+    toolVersion = "6.25.0"
+    ruleSets = ["${rootProject.projectDir}/config/pmd/pmd-ruleset.xml"]
+}	
+
+
+/** ########### CHECKSTYLE CONFIGURATION  **/
+
+checkstyle {
+    toolVersion '7.8.1'
+    configFile file("config/checkstyle/checkstyle.xml")
+}
+checkstyleMain {
+    source ='src/main/java'
+}
+checkstyleTest {
+    source ='src/test/java'
+}
+
+
+/** ########### SPOTBUGS CONFIGURATION  **/
+
+spotbugs {
+    excludeFilter = new File("config/spotbugs/spotbugs-exclude.xml")
+}
+
+spotbugsMain {
+    reports {
+        html {
+            enabled = true
+            destination = file("$buildDir/reports/spotbugs/main/spotbugs.html")
+            stylesheet = 'fancy-hist.xsl'
+        }
+    }
+}
+
+/** ########### JACOCO CONFIGURATION  **/
+
+ext['basePackage'] = 'co/com/carvajal/platform'
+
+test {
+    jacoco {
+        enabled = true
+    }
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled false
+        csv.enabled false
+    }
+        afterEvaluate {
+        classDirectories.from = files(classDirectories.files.collect {
+            fileTree(
+                dir: it, 
+                exclude: [ "${basePackage}/crosscutting/messages/**",
+        		   "${basePackage}/infrastructure/main/**",
+				   "${basePackage}/crosscutting/domain/**",
+				   "${basePackage}/crosscutting/persistence/entity/**",
+				   "${basePackage}/crosscutting/persistence/repository/**",
+				   "${basePackage}/infrastructure/configuration/**",
+				   "${basePackage}/modules/configurations/gateway/model/pki/**" ]                 
+                )
+        })
+    }
+}
+
+
+
+/** ########### SONARQUBE CONFIGURATION  **/
+
+ext['sonarBasePackage'] = 'src/main/java/co/com/carvajal/ecd'
+
+ext['sonarExcludesPackages'] = [
+				   "${sonarBasePackage}/crosscutting/messages/**",
+                   "${sonarBasePackage}/crosscutting/domain/**",
+				   "${sonarBasePackage}/infrastructure/main/**",
+				   "${sonarBasePackage}/crosscutting/persistence/entity/**",
+				   "${sonarBasePackage}/crosscutting/persistence/repository/**",
+				   "${sonarBasePackage}/infrastructure/configuration/**",
+                   "${sonarBasePackage}/modules/configurations/gateway/model/pki/**",
+]
+
+sonarqube {
+    properties {
+        property "sonar.projectName", "transform-edi"
+        property "sonar.projectKey", "transform-edi"
+        property "sonar.language", "java"
+        property "sonar.jacoco.reportPath", "${buildDir}/jacoco/test.exec"
+		property "sonar.host.url", "https://sonar.carvajal.com"
+		property "sonar.coverage.exclusions", sonarExcludesPackages
+		property "sonar.exclusions", sonarExcludesPackages										   
+    }
+    
+}

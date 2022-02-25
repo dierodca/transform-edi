@@ -1,0 +1,84 @@
+buildscript {
+
+	ext {
+	
+	    //dependencies service
+		springBootVersion ='2.3.1.RELEASE'
+		springDependencyManagement = '1.0.9.RELEASE'
+		postgresVersion = '42.2.5'
+		lombokVersion = '1.18.4'
+		log4jVersion = '2.11.1'
+		commonsLangVersion ='3.9'
+		mockitoVersion = '2.8.47'
+		powerMockitoVersion = '1.7.4'
+		commonFrameworkVersion = '1.0-local-SNAPSHOT'
+		swaggerVersion = '2.9.2'
+		latencyUtils = '2.0.3'
+		
+		// clean code
+		sonarQubeVersion ='3.2.0'
+		spotBugs ='4.4.4'
+		
+		
+		// component version settings
+		releaseNumber = '1'
+		sprintNumber = '0'
+		buildNumber = System.getenv('BUILD_NUMBER') == null ? 'local' : System.getenv('BUILD_NUMBER')
+		sonarQubeSite = ''
+		nexusRepository = ''
+		nexusUser = System.getenv('NEXUS_USER')
+		nexusPass = System.getenv('NEXUS_PASS')
+		commonsRepository = 'http://10.25.10.193:8081/repository/ebusiness-snapshot/'
+	}
+
+}
+
+/** ########### CODE PLUGINS  **/
+plugins {
+	id 'org.springframework.boot' version "${springBootVersion}"
+	id 'io.spring.dependency-management' version "${springDependencyManagement}"
+	id 'java'
+	id 'checkstyle'
+	id "com.github.spotbugs" version "${spotBugs}"
+	id 'pmd'
+	id 'jacoco'
+	id 'org.sonarqube' version "${sonarQubeVersion}"
+}
+
+
+group = 'co.com.carvajal.platform'
+archivesBaseName = 'transform-edi'
+version = "${releaseNumber}.${sprintNumber}-${buildNumber}-SNAPSHOT"
+
+
+sourceCompatibility = '11'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+
+/** ########### CODE QUALITY CONFIGURATION  **/
+
+apply from: 'service-dependencies.gradle'
+apply from: 'code-quality-config.gradle'
+apply from: 'cv-framework-config.gradle'
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+	maven { url "https://repo.spring.io/milestone" }
+	maven { 
+	  url commonsRepository
+	  allowInsecureProtocol = true
+	}
+}
+
+dependencies {
+    annotationProcessor LOMBOK
+	implementation SPRING_BOOT_RUNTIME 
+	implementation LOMBOK, LOG4J2, COMMONS_LANG, SWAGGER, COMMON_FRAMEWORK 
+	testImplementation SPRING_BOOT_UT, MOCKING
+}

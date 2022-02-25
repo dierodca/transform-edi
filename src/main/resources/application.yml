@@ -1,0 +1,23 @@
+server:
+   port: 9000
+   servlet:
+      contextPath: /transform-edi/v1
+      
+logging:
+   level:
+      org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+      
+spring:
+  servlet:
+    multipart:
+      enabled: "true"
+      max-file-size: 100MB
+      max-request-size: 100MB
+  thymeleaf:
+    mode: HTML
+    encoding: UTF-8
+    cache: false
+ 
+integration:
+  validation:
+    url: 'NOT-VALUE'
