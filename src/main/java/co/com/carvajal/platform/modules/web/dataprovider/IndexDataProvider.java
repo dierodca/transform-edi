@@ -14,11 +14,14 @@ import co.com.carvajal.platform.crosscutting.domain.ValidationResponse;
  */
 public interface IndexDataProvider {
 
-    String validate(final MultipartFile file, final String config) throws Exception;
+    public String validate(final MultipartFile file, final String config) throws IOException;
 
-    ValidationResponse generateZipEntry(final ZipOutputStream zipOut, final MultipartFile file,
-            final String content) throws IOException;
+    public ValidationResponse generateZipEntry(final ZipOutputStream zipOut,
+            final MultipartFile file, final String content) throws IOException;
 
-    void generateZipFile(final ByteArrayOutputStream baos, final String config) throws IOException;
+    public void generateZipFile(final ByteArrayOutputStream baos, final String config)
+            throws IOException;
+
+    public boolean isInvalidURI();
 
 }

@@ -3,7 +3,9 @@ package co.com.carvajal.platform.modules.web.dataprovider.impl;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
@@ -33,15 +35,13 @@ public class IndexProxy implements IndexDataProvider {
     private ApiValidationGateway validationGateway;
 
     @Override
-    public String validate(final MultipartFile file, final String config) throws Exception {
+    public String validate(final MultipartFile file, final String config) throws IOException {
         try {
             return this.validationGateway.validateDocument(
                     new String(Base64.encodeBase64(file.getBytes()), StandardCharsets.UTF_8),
                     config);
         } catch (final HttpStatusCodeException e) {
             return BasicConstants.ERROR.concat(e.getResponseBodyAsString());
-        } catch (final Exception e) {
-            throw e;
         }
     }
 
@@ -68,16 +68,27 @@ public class IndexProxy implements IndexDataProvider {
     @Override
     public void generateZipFile(final ByteArrayOutputStream baos, final String config)
             throws IOException {
-        if (baos.toByteArray().length > 0) {
+        if (baos.size() > 0) {
+            this.createDirectory(Paths.get(BasicConstants.UPLOADS));
             final Path rootPath = Paths.get(BasicConstants.UPLOADS)
                     .resolve(config.contains(BasicConstants.ORDERS.toLowerCase(Locale.US))
                             ? this.generateZipName(BasicConstants.ORDERS)
                             : this.generateZipName(BasicConstants.RETANN));
-            try (FileOutputStream fos =
-                    new FileOutputStream(rootPath.toAbsolutePath().toString())) {
+
+            try (FileOutputStream fos = new FileOutputStream(rootPath.toFile())) {
                 fos.write(baos.toByteArray());
             }
+        }
+    }
 
+    @Override
+    public boolean isInvalidURI() {
+        try {
+            final HttpURLConnection connection = this.validationGateway.getHttpURLConnection();
+            return connection == null
+                    || connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND;
+        } catch (final Exception e) {
+            return true;
         }
     }
 
@@ -99,6 +110,12 @@ public class IndexProxy implements IndexDataProvider {
                 BasicConstants.EMPTY_STRING);
         return uuid.concat(BasicConstants.UNDERSCORE).concat(name)
                 .concat(BasicConstants.ZIP_EXTENSION);
+    }
+
+    private void createDirectory(final Path path) throws IOException {
+        if (Files.notExists(path)) {
+            Files.createDirectory(path);
+        }
     }
 
 }

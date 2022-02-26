@@ -27,6 +27,8 @@ import co.com.carvajal.platform.modules.web.usecase.IndexProcess;
 @RequestMapping(value = "/index")
 public class IndexController {
 
+
+
     private List<ValidationResponse> lstFiles;
 
     @Autowired
@@ -63,9 +65,13 @@ public class IndexController {
         }
 
         try {
-            this.lstFiles = this.process.processDocuments(files, config);
-            this.setListFiles(model, this.lstFiles);
             this.setErrorMessage(model, BasicConstants.EMPTY_STRING);
+            this.lstFiles = this.process.processDocuments(files, config);
+            if (this.lstFiles.isEmpty()) {
+                this.setErrorMessage(model, IndexMessages.API_EDC_NOT_FOUND);
+            }
+            this.setListFiles(model, this.lstFiles);
+
         } catch (final IOException e) {
             this.setListFiles(model, this.lstFiles);
             this.setErrorMessage(model, e.getMessage());

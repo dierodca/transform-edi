@@ -19,4 +19,7 @@ public class IndexMessages {
             "finaliza proceso de validación de archivos";
     public static final String START_PROCESS_VALIDATION_FILES =
             "Inicia proceso de validación de archivos";
+    public static final String API_EDC_NOT_FOUND =
+            "No fue posible procesar los documentos, valide que tenga conexión al api EDC.";
+    public static final String API_EDC_NOT_ACCESS = "No tiene acceso al api EDC";
 }

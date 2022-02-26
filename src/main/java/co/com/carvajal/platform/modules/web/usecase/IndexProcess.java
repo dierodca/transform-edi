@@ -25,6 +25,7 @@ import lombok.extern.log4j.Log4j2;
 @UseCase
 public class IndexProcess {
 
+
     @Autowired
     @Qualifier("indexProxy")
     private IndexDataProvider indexProxy;
@@ -34,6 +35,12 @@ public class IndexProcess {
 
         log.info(IndexMessages.START_PROCESS_VALIDATION_FILES);
         final List<ValidationResponse> lstResultValidation = new ArrayList<>();
+
+        if (this.indexProxy.isInvalidURI()) {
+            log.error(IndexMessages.API_EDC_NOT_ACCESS);
+            return lstResultValidation;
+        }
+
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (ZipOutputStream zipOut = new ZipOutputStream(baos)) {
 
